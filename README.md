@@ -38,10 +38,10 @@ Download the `.exe` file:
 
 ### Configuration
 1. **Configure Environment**:
-   Copy `.env.example` to `.env` and fill in your MikroTik details:
-   ```bash
-   cp .env.example .env
-   ```
+   Create a `.env` file **in the same folder as the executable**. You can copy the example from the repository or create it manually:
+
+   > [!IMPORTANT]
+   > The `.env` file must be located in the same directory where you run the binary.
 
    | Variable | Description | Example |
    | :--- | :--- | :--- |
