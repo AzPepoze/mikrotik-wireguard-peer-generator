@@ -1,0 +1,24 @@
+{
+	"name": "mikrotik-wireguard-peer-generator",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"start": "bun index.ts",
+		"build:linux": "bun utils/build.ts linux",
+		"build:win": "bun utils/build.ts windows",
+		"build:mac": "bun utils/build.ts mac",
+		"build:all": "bun utils/build.ts all"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.13"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@types/prompts": "^2.4.9",
+		"dotenv": "^17.4.2",
+		"prompts": "^2.4.2"
+	}
+}
