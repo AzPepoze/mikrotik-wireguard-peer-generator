@@ -51,7 +51,7 @@ Download the `.exe` file:
    | `ENDPOINT` | Public IP/Domain and port of your MikroTik | `vpn.example.com:51820` |
    | `SERVER_PUBLIC_KEY` | Public key of your MikroTik WireGuard interface | `RT8JMP...` |
    | `INTERNAL_LAN` | Internal network routes (comma separated) | `192.168.1.0/24` |
-   | `CONFIG_NAME` | (Optional) Default filename for generated config | `client.conf` |
+   | `CONFIG_NAME` | (Optional) Filename suffix (will be {name}-{CONFIG_NAME}.conf) | `client` |
 
 ### Usage
 2. **Run the Generator**:

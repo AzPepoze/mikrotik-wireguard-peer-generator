@@ -75,7 +75,8 @@ PersistentKeepalive = 25
 
 	/* ---------------- SAVE FILE ---------------- */
 
-	const filename = env.CONFIG_NAME || "client.conf";
+	const configSuffix = (env.CONFIG_NAME || "client").replace(/\.conf$/, "");
+	const filename = `${answers.name}-${configSuffix}.conf`;
 
 	await writeFile(filename, clientConfig);
 
