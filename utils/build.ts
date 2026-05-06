@@ -46,7 +46,7 @@ async function buildTarget(target: Target) {
 	console.log(`Building for ${targetString}...`);
 
 	try {
-		await Bun.$`bun build ${ENTRY_POINT} --compile --target=${targetString} --outfile ${outfilePath}`;
+		await Bun.$`bun build ${ENTRY_POINT} --compile --minify --target=${targetString} --outfile ${outfilePath}`;
 		console.log(`Finished building for ${targetString}`);
 	} catch (error) {
 		console.error(`Failed to build for ${targetString}:`, error);
