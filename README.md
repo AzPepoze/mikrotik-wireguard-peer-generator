@@ -40,8 +40,8 @@ Download the `.exe` file:
 1. **Configure Environment**:
    Create a `.env` file **in the same folder as the executable**. You can copy the example from the repository or create it manually:
 
-   > [!IMPORTANT]
-   > The `.env` file must be located in the same directory where you run the binary.
+> [!IMPORTANT]
+> The `.env` file must be located in the same directory where you run the binary.
 
    | Variable | Description | Example |
    | :--- | :--- | :--- |
