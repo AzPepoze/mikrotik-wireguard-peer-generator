@@ -1,9 +1,12 @@
 import "dotenv/config";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
+import { existsSync } from "fs";
 import { join } from "path";
 import prompts from "prompts";
 import { generateMikrotikCommand, generateWireGuardConfig } from "./utils/config-generator";
 import { DEFAULT_README_TEMPLATE } from "./utils/template";
+import { readMapCsv, getNextOctet, appendMapCsv } from "./utils/csv-handler";
+import { handleCommandLineArguments } from "./utils/cli";
 import { zipSync, strToU8 } from "fflate";
 
 const environmentVariables = process.env;
@@ -22,6 +25,13 @@ async function generateKeyPair() {
 }
 
 async function main() {
+	if (await handleCommandLineArguments()) {
+		process.exit(0);
+	}
+
+	const existingPeers = readMapCsv();
+	const suggestedNextOctet = getNextOctet(existingPeers);
+
 	const userInputs = await prompts([
 		{
 			type: "text",
@@ -32,6 +42,7 @@ async function main() {
 			type: "number",
 			name: "lastOctet",
 			message: "Last IP octet:",
+			initial: suggestedNextOctet,
 		},
 	]);
 
@@ -71,22 +82,7 @@ async function main() {
 	const hasDns = !!environmentVariables.DNS_SERVER;
 	const noDnsClientConfig = hasDns ? generateWireGuardConfig({ ...configOptions, noDns: true }) : "";
 
-	console.log("\n========================================");
-	console.log(" CLIENT CONFIG (NORMAL)");
-	console.log("========================================\n");
-	console.log(normalClientConfig);
 
-	console.log("\n========================================");
-	console.log(" CLIENT CONFIG (LINUX)");
-	console.log("========================================\n");
-	console.log(linuxClientConfig);
-
-	if (hasDns) {
-		console.log("\n========================================");
-		console.log(" CLIENT CONFIG (NO DNS)");
-		console.log("========================================\n");
-		console.log(noDnsClientConfig);
-	}
 
 	const configSuffix = (environmentVariables.CONFIG_NAME || "client").replace(/\.conf$/, "");
 	const folderName = `${userInputs.name}-${configSuffix}`;
@@ -121,11 +117,23 @@ async function main() {
 
 	const zipData = zipSync(zipFiles);
 
-	const zipFilename = `${folderName}.zip`;
-	await writeFile(join(process.cwd(), zipFilename), zipData);
-	console.log(`\n- ${zipFilename}: Created successfully`);
+	const outDir = join(process.cwd(), "out");
+	if (!existsSync(outDir)) {
+		await mkdir(outDir, { recursive: true });
+	}
 
-	console.log(`\nSaved configs to -> ${zipFilename}`);
+	const zipFilename = `${folderName}.zip`;
+	const zipFilePath = join(outDir, zipFilename);
+	await writeFile(zipFilePath, zipData);
+
+	appendMapCsv({
+		name: userInputs.name,
+		octet_number: userInputs.lastOctet,
+		mikrotik_command: mikrotikCommand,
+		normal_conf: normalClientConfig,
+		linux_conf: linuxClientConfig,
+		no_dns_conf: noDnsClientConfig,
+	});
 }
 
 main();
