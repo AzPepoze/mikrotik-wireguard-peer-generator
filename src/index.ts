@@ -1,9 +1,10 @@
 import "dotenv/config";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile } from "fs/promises";
 import { join } from "path";
 import prompts from "prompts";
 import { generateMikrotikCommand, generateWireGuardConfig } from "./utils/config-generator";
 import { DEFAULT_README_TEMPLATE } from "./utils/template";
+import { zipSync, strToU8 } from "fflate";
 
 const environmentVariables = process.env;
 
@@ -66,7 +67,8 @@ async function main() {
 
 	const normalClientConfig = generateWireGuardConfig(configOptions);
 	const linuxClientConfig = generateWireGuardConfig({ ...configOptions, isLinux: true });
-	const noDnsClientConfig = generateWireGuardConfig({ ...configOptions, noDns: true });
+	const hasDns = !!environmentVariables.DNS_SERVER;
+	const noDnsClientConfig = hasDns ? generateWireGuardConfig({ ...configOptions, noDns: true }) : "";
 
 	console.log("\n========================================");
 	console.log(" CLIENT CONFIG (NORMAL)");
@@ -78,10 +80,12 @@ async function main() {
 	console.log("========================================\n");
 	console.log(linuxClientConfig);
 
-	console.log("\n========================================");
-	console.log(" CLIENT CONFIG (NO DNS)");
-	console.log("========================================\n");
-	console.log(noDnsClientConfig);
+	if (hasDns) {
+		console.log("\n========================================");
+		console.log(" CLIENT CONFIG (NO DNS)");
+		console.log("========================================\n");
+		console.log(noDnsClientConfig);
+	}
 
 	const configSuffix = (environmentVariables.CONFIG_NAME || "client").replace(/\.conf$/, "");
 	const folderName = `${userInputs.name}-${configSuffix}`;
@@ -90,28 +94,37 @@ async function main() {
 	const linuxFilename = `${folderName}-linux.conf`;
 	const noDnsFilename = `${folderName}-no-dns.conf`;
 
-	const folderPath = join(process.cwd(), folderName);
-	await mkdir(folderPath, { recursive: true });
-
-	const normalFilePath = join(folderPath, normalFilename);
-	const linuxFilePath = join(folderPath, linuxFilename);
-	const noDnsFilePath = join(folderPath, noDnsFilename);
-
-	await writeFile(normalFilePath, normalClientConfig);
-	await writeFile(linuxFilePath, linuxClientConfig);
-	await writeFile(noDnsFilePath, noDnsClientConfig);
-
-	const readmeContent = DEFAULT_README_TEMPLATE
+	let readmeContent = DEFAULT_README_TEMPLATE
 		.replace(/{{name}}/g, userInputs.name)
 		.replace(/{{suffix}}/g, configSuffix);
 
-	await writeFile(join(folderPath, "README.txt"), readmeContent);
-	console.log("- README.txt: Created from template");
+	if (hasDns) {
+		readmeContent = readmeContent
+			.replace("{{no_dns_section}}", `\n${noDnsFilename} - Windows / Linux / macOs / Mobile\nUse this if you don't want to use the VPN DNS.\n`)
+			.replace("{{dns_note}}", `\n* NOTE : VPN DNS is for able to use servername instead of ip.`);
+	} else {
+		readmeContent = readmeContent
+			.replace("{{no_dns_section}}", "")
+			.replace("{{dns_note}}", "");
+	}
 
-	console.log(`\nSaved configs to folder -> ${folderName}`);
-	console.log(`- Normal: ${normalFilename}`);
-	console.log(`- Linux:  ${linuxFilename}`);
-	console.log(`- No DNS: ${noDnsFilename}`);
+	const zipFiles: Record<string, Uint8Array> = {
+		[normalFilename]: strToU8(normalClientConfig),
+		[linuxFilename]: strToU8(linuxClientConfig),
+		"README.txt": strToU8(readmeContent.trim() + "\n"),
+	};
+
+	if (hasDns) {
+		zipFiles[noDnsFilename] = strToU8(noDnsClientConfig);
+	}
+
+	const zipData = zipSync(zipFiles);
+
+	const zipFilename = `${folderName}.zip`;
+	await writeFile(join(process.cwd(), zipFilename), zipData);
+	console.log(`\n- ${zipFilename}: Created successfully`);
+
+	console.log(`\nSaved configs to -> ${zipFilename}`);
 }
 
 main();

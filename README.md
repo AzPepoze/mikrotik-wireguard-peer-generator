@@ -51,7 +51,7 @@ Download the `.exe` file:
    | `ENDPOINT` | Public IP/Domain and port of your MikroTik | `vpn.example.com:51820` |
    | `SERVER_PUBLIC_KEY` | Public key of your MikroTik WireGuard interface | `RT8JMP...` |
    | `INTERNAL_LAN` | Internal network routes (comma separated) | `192.168.1.0/24` |
-   | `CONFIG_NAME` | (Optional) Filename suffix (will be {name}-{CONFIG_NAME}.conf) | `client` |
+   | `CONFIG_NAME` | (Optional) Filename suffix (will be {name}-{CONFIG_NAME}.zip) | `client` |
 
 ### Usage
 2. **Run the Generator**:
@@ -71,7 +71,12 @@ Download the `.exe` file:
 
 3. **Follow Prompts**: Enter the peer name and the last octet of the client IP.
 
-4. **Apply**: Copy the generated command to your MikroTik terminal and use the generated `.conf` file on your client.
+4. **Extract and Apply**: Extract the generated `.zip` file. It contains multiple configuration variants:
+   - `{name}-{suffix}.conf`: Standard configuration.
+   - `{name}-{suffix}-linux.conf`: For fix VPN DNS not working on Linux.
+   - `{name}-{suffix}-no-dns.conf`: Configuration without DNS (only generated if `DNS_SERVER` is set).
+
+   Copy the MikroTik command to your router terminal and use the appropriate `.conf` file for your client.
 
 ---
 
