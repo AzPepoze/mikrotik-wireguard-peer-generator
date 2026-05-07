@@ -17,6 +17,7 @@ interface WireGuardConfigOptions {
 	vpnSubnet: string;
 	internalLan: string;
 	isLinux?: boolean;
+	noDns?: boolean;
 }
 
 export function generateMikrotikCommand(options: MikrotikConfigOptions): string {
@@ -37,10 +38,13 @@ export function generateWireGuardConfig(options: WireGuardConfigOptions): string
 		"[Interface]",
 		`PrivateKey = ${options.privateKey}`,
 		`Address = ${options.clientIp}/24`,
-		`DNS = ${options.dnsServer}`,
 	];
 
-	if (options.isLinux) {
+	if (!options.noDns) {
+		interfaceSection.push(`DNS = ${options.dnsServer}`);
+	}
+
+	if (options.isLinux && !options.noDns) {
 		interfaceSection.push(`PostUp = resolvectl dns %i ${options.dnsServer} && resolvectl domain %i "~."`);
 	}
 
