@@ -63,6 +63,7 @@ async function main() {
 		endpoint: environmentVariables.ENDPOINT || "",
 		vpnSubnet: environmentVariables.VPN_SUBNET || "",
 		internalLan: environmentVariables.INTERNAL_LAN || "",
+		dnsDomain: environmentVariables.DNS_DOMAIN || "",
 	};
 
 	const normalClientConfig = generateWireGuardConfig(configOptions);

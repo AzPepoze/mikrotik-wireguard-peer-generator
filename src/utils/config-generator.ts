@@ -18,6 +18,7 @@ interface WireGuardConfigOptions {
 	internalLan: string;
 	isLinux?: boolean;
 	noDns?: boolean;
+	dnsDomain?: string;
 }
 
 export function generateMikrotikCommand(options: MikrotikConfigOptions): string {
@@ -41,11 +42,13 @@ export function generateWireGuardConfig(options: WireGuardConfigOptions): string
 	];
 
 	if (!options.noDns) {
-		interfaceSection.push(`DNS = ${options.dnsServer}`);
+		const dnsValue = options.dnsDomain ? `${options.dnsServer}, ${options.dnsDomain}` : options.dnsServer;
+		interfaceSection.push(`DNS = ${dnsValue}`);
 	}
 
 	if (options.isLinux && !options.noDns) {
-		interfaceSection.push(`PostUp = resolvectl dns %i ${options.dnsServer} && resolvectl domain %i "~."`);
+		const domain = options.dnsDomain || "~.";
+		interfaceSection.push(`PostUp = resolvectl dns %i ${options.dnsServer} && resolvectl domain %i ${domain}`);
 	}
 
 	const peerSection = [

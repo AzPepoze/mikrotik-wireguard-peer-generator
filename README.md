@@ -50,6 +50,7 @@ Download the `.exe` file:
    | `DNS_SERVER` | DNS server to be used by clients | `10.8.0.1` |
    | `ENDPOINT` | Public IP/Domain and port of your MikroTik | `vpn.example.com:51820` |
    | `SERVER_PUBLIC_KEY` | Public key of your MikroTik WireGuard interface | `RT8JMP...` |
+   | `DNS_DOMAIN` | (Optional) DNS search domain for clients | `saig` |
    | `INTERNAL_LAN` | Internal network routes (comma separated) | `192.168.1.0/24` |
    | `CONFIG_NAME` | (Optional) Filename suffix (will be {name}-{CONFIG_NAME}.zip) | `client` |
 
