@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const DIST_DIR = "./dist";
-const ENTRY_POINT = "./index.ts";
+const ENTRY_POINT = "./src/index.ts";
 
 interface Target {
 	os: string;
